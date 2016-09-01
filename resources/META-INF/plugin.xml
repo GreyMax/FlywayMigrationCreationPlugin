@@ -1,0 +1,43 @@
+<idea-plugin version="2">
+  <id>com.alexanderpa.flyway.migration.creator</id>
+  <name>Flyway Migration Creation</name>
+  <version>1.0</version>
+  <vendor email="pasechnik.alexander@gmail.com">Alexander Pasechnik</vendor>
+
+  <description><![CDATA[
+      This plugin adds new menu item to easily create new flyway migrations.
+    ]]></description>
+
+  <change-notes>
+  </change-notes>
+
+  <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
+  <idea-version since-build="141.0"/>
+
+  <extensions defaultExtensionNs="com.intellij">
+    <!-- Add your extensions here -->
+  </extensions>
+
+  <actions>
+    <group id="FlywayMigrationCreator.NewMigrationGroup" text="Flyway Migration" icon="FlywayMigrationIcons.MIGRATION_FILE_ICON"
+           class="com.intellij.plugins.alexanderpa.flyway.migration.actions.NewMigrationGroup" popup="true">
+      <add-to-group group-id="NewGroup" anchor="after" relative-to-action="NewXmlDescriptor" />
+    </group>
+
+    <action id="FlywayMigrationCreator.NewVersionedMigrationAction"
+            class="com.intellij.plugins.alexanderpa.flyway.migration.actions.NewVersionedMigration"
+            text="Versioned migration"
+            description="Create new flyway versioned migration"
+            icon="FlywayMigrationIcons.MIGRATION_FILE_ICON">
+      <add-to-group group-id="FlywayMigrationCreator.NewMigrationGroup" anchor="first"/>
+    </action>
+    <action id="FlywayMigrationCreator.NewRepeatableMigrationAction"
+            class="com.intellij.plugins.alexanderpa.flyway.migration.actions.NewRepeatableMigration"
+            text="Repeatable migration"
+            description="Create new flyway repeatable migration"
+            icon="FlywayMigrationIcons.MIGRATION_FILE_ICON">
+      <add-to-group group-id="FlywayMigrationCreator.NewMigrationGroup" anchor="last"/>
+    </action>
+  </actions>
+
+</idea-plugin>
