@@ -14,17 +14,10 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import org.apache.commons.lang.StringUtils;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
-
-import static com.intellij.plugins.alexanderpa.flyway.migration.MigrationType.VERSIONED;
-import static org.apache.commons.lang.StringUtils.EMPTY;
+import java.util.Optional;
 
 public class MigrationService {
 
-    private static final String MIGRATION_SEPARATOR = "__";
-    private static final String MIGRATION_TIMESTAMP_FORMAT = "yyyyMMddHHmmss";
-    private static final SimpleDateFormat sdf = new SimpleDateFormat(MIGRATION_TIMESTAMP_FORMAT);
     private static final MigrationService instance = new MigrationService();
 
     public static MigrationService getInstance() {
@@ -32,7 +25,7 @@ public class MigrationService {
     }
 
     public void showCreateMigrationDialog(AnActionEvent event, MigrationType migrationType) {
-        String migrationName = Messages.showInputDialog("Enter migration description", "New flyway migration", null, null, new InputValidator() {
+        String migrationName = Messages.showInputDialog("Enter migration description", "New Flyway Migration", null, null, new InputValidator() {
             @Override
             public boolean checkInput(String s) {
                 return !s.trim().equals(StringUtils.EMPTY);
@@ -51,45 +44,30 @@ public class MigrationService {
     private void createMigration(AnActionEvent event, MigrationType migrationType, String migrationName) {
         Project project = event.getProject();
         assert project != null;
-        PsiElement psiElement = DataKeys.PSI_ELEMENT.getData(event.getDataContext());
-        if (null != psiElement) {
-            PsiDirectory directory = (PsiDirectory) (psiElement instanceof PsiDirectory ?  psiElement : psiElement.getParent());
-            String fileName = generateFileName(migrationType, migrationName);
+
+        Optional<PsiDirectory> psiDirectory = getDirectory(event);
+        psiDirectory.ifPresent(directory -> {
+            String fileName = migrationType.buildMigrationFileName(
+                    fixMigrationName(migrationName));
 
             Application app = ApplicationManager.getApplication();
             PsiFile psiFile = app.runWriteAction((Computable<PsiFile>) () -> directory.createFile(fileName));
             FileEditorManager fileEditorManager = FileEditorManager.getInstance(project);
             fileEditorManager.openFile(psiFile.getVirtualFile(), true);
-        }
+        });
     }
 
-    private String generateFileName(MigrationType migrationType, String migrationName) {
-        return new StringBuilder()
-                .append(getMigrationFilePrefix(migrationType))
-                .append(getMigrationVersion(migrationType))
-                .append(MIGRATION_SEPARATOR)
-                .append(fixMigrationName(migrationName))
-                .append(getMigrationFileSuffix())
-                .toString();
+    private Optional<PsiDirectory> getDirectory(AnActionEvent event) {
+        PsiElement psiElement = DataKeys.PSI_ELEMENT.getData(event.getDataContext());
+        while (psiElement != null && !(psiElement instanceof PsiDirectory)) {
+            psiElement = psiElement.getParent();
+        }
+        return Optional.ofNullable(psiElement)
+                .map(el -> (PsiDirectory) el);
     }
 
     private String fixMigrationName(String migrationName) {
         return migrationName.trim().replaceAll("\\s+", "_");
     }
 
-    private String getMigrationFilePrefix(MigrationType migrationType) {
-        switch (migrationType) {
-            case VERSIONED: return "V";
-            case REPEATABLE: return "R";
-            default: throw new RuntimeException("Not supported migration type");
-        }
-    }
-
-    private String getMigrationVersion(MigrationType migrationType) {
-        return migrationType.equals(VERSIONED) ? sdf.format(new Date()) : EMPTY;
-    }
-
-    private String getMigrationFileSuffix() {
-        return ".sql";
-    }
 }
