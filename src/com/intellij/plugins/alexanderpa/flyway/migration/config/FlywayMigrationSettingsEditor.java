@@ -8,6 +8,13 @@ import javax.swing.*;
 
 public class FlywayMigrationSettingsEditor extends SettingsEditor<FlywayMigrationConfig> {
 
+    private final FlywayConfigPanelValidator validator;
+
+    public FlywayMigrationSettingsEditor() {
+        validator = new FlywayConfigPanelValidator();
+        addSettingsEditorListener(validator);
+    }
+
     @Override
     protected void resetEditorFrom(@NotNull FlywayMigrationConfig flywayMigrationConfig) {
         FlywayConfigPanel configPanel = (FlywayConfigPanel) getComponent();
@@ -17,7 +24,10 @@ public class FlywayMigrationSettingsEditor extends SettingsEditor<FlywayMigratio
     @Override
     protected void applyEditorTo(@NotNull FlywayMigrationConfig flywayMigrationConfig) throws ConfigurationException {
         FlywayConfigPanel configPanel = (FlywayConfigPanel) getComponent();
-        flywayMigrationConfig.setPattern(configPanel.getPattern());
+        String pattern = configPanel.getPattern();
+        if (validator.validate(pattern)) {
+            flywayMigrationConfig.setPattern(pattern);
+        }
     }
 
     @NotNull

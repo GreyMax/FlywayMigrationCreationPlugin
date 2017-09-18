@@ -1,5 +1,7 @@
 package com.intellij.plugins.alexanderpa.flyway.migration.config;
 
+import com.intellij.ui.JBColor;
+
 import javax.swing.*;
 import java.awt.*;
 
@@ -30,9 +32,21 @@ public class FlywayConfigPanel extends JPanel {
 
     public void setPattern(String pattern) {
         patternField.setText(pattern);
+        setValidPattern(true);
     }
 
     public String getPattern() {
         return patternField.getText();
+    }
+
+    public void setValidPattern(boolean isValid) {
+        if (isValid) {
+            patternField.setForeground(JBColor.foreground());
+            patternField.setBorder(BorderFactory.createEtchedBorder());
+
+        } else {
+            patternField.setForeground(JBColor.RED);
+            patternField.setBorder(BorderFactory.createEtchedBorder(JBColor.RED, JBColor.RED));
+        }
     }
 }
