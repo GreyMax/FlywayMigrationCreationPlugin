@@ -1,32 +1,21 @@
 package com.intellij.plugins.alexanderpa.flyway.migration;
 
-import org.apache.commons.lang.StringUtils;
+import com.intellij.openapi.project.Project;
 
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 public enum MigrationType {
-    VERSIONED("V", ".sql", MigrationTimestampGenerator::generate),
-    REPEATABLE("R", ".sql", () -> StringUtils.EMPTY);
+    VERSIONED(VersionedMigrationNameGenerator::new),
+    REPEATABLE(RepeatableMigrationNameGenerator::new);
 
-    private static final String SEPARATOR = "__";
+    private Function<Project, MigrationNameGenerator> versionGeneratorFunction;
 
-    private String prefix;
-    private String suffix;
-    private Supplier<String> versionGenerator;
-
-    MigrationType(String prefix, String suffix, Supplier<String> versionGenerator) {
-        this.prefix = prefix;
-        this.suffix = suffix;
-        this.versionGenerator = versionGenerator;
+    MigrationType(Function<Project, MigrationNameGenerator> versionGenerator) {
+        this.versionGeneratorFunction = versionGenerator;
     }
 
-    public String buildMigrationFileName(String migrationName) {
-        return new StringBuilder()
-                .append(prefix)
-                .append(versionGenerator.get())
-                .append(SEPARATOR)
-                .append(migrationName)
-                .append(suffix)
-                .toString();
+    public String buildMigrationFileName(Project project, String migrationName) {
+        MigrationNameGenerator nameGenerator = versionGeneratorFunction.apply(project);
+        return nameGenerator.generate(migrationName);
     }
 }

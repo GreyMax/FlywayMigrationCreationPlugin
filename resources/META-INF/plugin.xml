@@ -1,7 +1,7 @@
 <idea-plugin version="2">
   <id>com.alexanderpa.flyway.migration.creator</id>
   <name>Flyway Migration Creation</name>
-  <version>1.1</version>
+  <version>2.0</version>
   <vendor email="pasechnik.alexander@gmail.com">Alexander Pasechnik</vendor>
 
   <description><![CDATA[
@@ -9,6 +9,10 @@
     ]]></description>
 
   <change-notes><![CDATA[
+      <b>v2.0</b> (19.09.2017)
+      <ul>
+        <li>Add configuration UI</li>
+      </ul>
       <b>v1.1</b> (22.02.2017)
       <ul>
         <li>Bug fixes</li>
@@ -20,6 +24,13 @@
 
   <extensions defaultExtensionNs="com.intellij">
     <!-- Add your extensions here -->
+    <projectConfigurable id="com.intellij.plugins.alexanderpa.flyway.migration.config"
+                         instance="com.intellij.plugins.alexanderpa.flyway.migration.config.FlywayMigrationConfigurable" />
+
+    <projectService serviceImplementation="com.intellij.plugins.alexanderpa.flyway.migration.config.FlywayMigrationConfig"
+                    serviceInterface="com.intellij.plugins.alexanderpa.flyway.migration.config.FlywayMigrationConfig"/>
+    <projectService serviceImplementation="com.intellij.plugins.alexanderpa.flyway.migration.MigrationService"
+                    serviceInterface="com.intellij.plugins.alexanderpa.flyway.migration.MigrationService"/>
   </extensions>
 
   <actions>

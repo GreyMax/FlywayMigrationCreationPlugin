@@ -4,6 +4,7 @@ import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.DataKeys;
 import com.intellij.openapi.application.Application;
 import com.intellij.openapi.application.ApplicationManager;
+import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditorManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.InputValidator;
@@ -18,10 +19,8 @@ import java.util.Optional;
 
 public class MigrationService {
 
-    private static final MigrationService instance = new MigrationService();
-
-    public static MigrationService getInstance() {
-        return instance;
+    public static MigrationService getInstance(Project project) {
+        return ServiceManager.getService(project, MigrationService.class);
     }
 
     public void showCreateMigrationDialog(AnActionEvent event, MigrationType migrationType) {
@@ -47,7 +46,7 @@ public class MigrationService {
 
         Optional<PsiDirectory> psiDirectory = getDirectory(event);
         psiDirectory.ifPresent(directory -> {
-            String fileName = migrationType.buildMigrationFileName(
+            String fileName = migrationType.buildMigrationFileName(project,
                     fixMigrationName(migrationName));
 
             Application app = ApplicationManager.getApplication();
